@@ -171,15 +171,17 @@ async function runSubmitBatchTest(opts: { batchSize: number }) {
     rewardToken: ZeroAddress
   }
 
+  let payments = {
+    amounts: txBatch.amounts,
+    destinations: txBatch.destinations,
+    fees: txBatch.fees,
+    feePaymentAddress: signers[0].address,
+  }
 
   await gravity.submitBatch(
     valset,
-
     sigs,
-
-    txBatch.amounts,
-    txBatch.destinations,
-    txBatch.fees,
+    payments,
     1,
     testERC20.address,
     batchTimeout
@@ -320,8 +322,8 @@ async function runLogicCallTest(opts: {
 
   await gravity.submitLogicCall(
     valset,
-
     sigs,
+    signers[0].address,
     logicCallArgs
   );
 
