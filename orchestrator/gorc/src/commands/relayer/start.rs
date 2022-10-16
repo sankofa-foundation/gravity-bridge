@@ -42,6 +42,12 @@ impl Runnable for StartCommand {
             .parse()
             .expect("Could not parse gravity contract address");
 
+        let mut payment_address: EthAddress = config
+            .gravity
+            .payment_address
+            .parse()
+            .expect("Could not parse gravity contract address");
+
         let timeout = RELAYER_LOOP_SPEED;
 
         abscissa_tokio::run_with_actix(&APP, async {
@@ -66,6 +72,12 @@ impl Runnable for StartCommand {
                 SignerMiddleware::new(provider, ethereum_wallet.clone().with_chain_id(chain_id));
             let eth_client = Arc::new(eth_client);
 
+            // if payment address is zero, then use the ethereum key address used for signing tx
+            if payment_address == EthAddress::zero() {
+                info!("relayer payment address is zero, use signing ethereum address instead");
+                payment_address = eth_client.address()
+            }
+
             info!("Starting Relayer");
             info!("Ethereum Address: {}", format_eth_address(ethereum_address));
 
@@ -80,6 +92,7 @@ impl Runnable for StartCommand {
                 eth_client,
                 grpc,
                 contract_address,
+                payment_address,
                 config.ethereum.gas_price_multiplier,
                 &mut fee_manager,
                 config.ethereum.gas_multiplier,
