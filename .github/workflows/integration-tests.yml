@@ -203,7 +203,7 @@ jobs:
       - name: build-and-push
         uses: docker/build-push-action@v2
         with:
-          context: integration_tests/ethereum
+          context: .
           file: integration_tests/ethereum/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -284,3 +284,4 @@ jobs:
         run: ./integration_tests/integration_tests.test -test.failfast -test.v -test.run IntegrationTestSuite -testify.m Test${{ matrix.test_type }}
         env:
           ARCHIVE_NODE_URL: https://eth-mainnet.alchemyapi.io/v2/${{ secrets.ALCHEMY_ID }}
+          E2E_SKIP_CLEANUP: true
