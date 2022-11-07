@@ -45,7 +45,7 @@ import (
 
 const (
 	testDenom           = "testgb"
-	initBalanceStr      = "1000000000000testgb"
+	initBalanceStr      = "100000000000000testgb"
 	minGasPrice         = "2"
 	ethChainID     uint = 15
 )
@@ -60,7 +60,7 @@ func MNEMONICS() []string {
 }
 
 var (
-	stakeAmount, _    = sdk.NewIntFromString("100000000000")
+	stakeAmount, _    = sdk.NewIntFromString("100000000")
 	stakeAmountCoin   = sdk.NewCoin(testDenom, stakeAmount)
 	gravityContract   = common.HexToAddress("0x04C89607413713Ec9775E14b954286519d836FEf")
 	testERC20contract = common.HexToAddress("0x4C4a2f8c81640e47606d3fd77B353E87Ba015584")
@@ -844,4 +844,26 @@ func (s *IntegrationTestSuite) SendEthTransaction(validator *validator, toAddres
 	}
 
 	return nil
+}
+
+func (s *IntegrationTestSuite) getLastValsetNonce(erc20contract common.Address) (*sdk.Int, error) {
+	ethClient, err := ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
+	if err != nil {
+		return nil, err
+	}
+
+	data := PackLastValsetNonce()
+
+	response, err := ethClient.CallContract(context.Background(), ethereum.CallMsg{
+		To:   &erc20contract,
+		Gas:  0,
+		Data: data,
+	}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	nonce := UnpackEthUInt(response)
+
+	return &nonce, err
 }
