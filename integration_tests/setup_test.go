@@ -356,6 +356,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[gravitytypes.ModuleName], &gravityGenState))
 	gravityGenState.Params.GravityId = "gravitytest"
 	gravityGenState.Params.BridgeEthereumAddress = gravityContract.String()
+	gravityGenState.Params.SignedBatchesWindow = 15
 
 	bz, err = cdc.MarshalJSON(&gravityGenState)
 	s.Require().NoError(err)
@@ -678,7 +679,7 @@ msg_batch_size = 5
 		s.Require().NoError(err)
 
 		s.orchResources[i] = resource
-		s.T().Logf("started orchestrator container: %s", resource.Container.ID)
+		s.T().Logf("started orchestrator container: id %s, name %s", resource.Container.ID, resource.Container.Name)
 	}
 
 	// TODO(mvid) Determine if there is a way to check the health or status of
@@ -739,15 +740,15 @@ func (s *IntegrationTestSuite) TestBasicChain() {
 }
 
 func (s *IntegrationTestSuite) deployERC20(denom string, name string, symbol string, decimals uint8) error {
-	return s.SendEthTransaction(s.chain.validators[0], gravityContract, PackDeployERC20(denom, name, symbol, decimals))
+	return s.SendEthTransaction(&s.chain.validators[0].ethereumKey, gravityContract, PackDeployERC20(denom, name, symbol, decimals))
 }
 
 func (s *IntegrationTestSuite) approveERC20() error {
-	return s.SendEthTransaction(s.chain.validators[0], testERC20contract, PackApproveERC20(gravityContract))
+	return s.SendEthTransaction(&s.chain.validators[0].ethereumKey, testERC20contract, PackApproveERC20(gravityContract))
 }
 
 func (s *IntegrationTestSuite) sendToCosmos(destination sdk.AccAddress, amount sdk.Int) error {
-	return s.SendEthTransaction(s.chain.validators[0], gravityContract, PackSendToCosmos(testERC20contract, destination, amount))
+	return s.SendEthTransaction(&s.chain.validators[0].ethereumKey, gravityContract, PackSendToCosmos(testERC20contract, destination, amount))
 }
 
 func (s *IntegrationTestSuite) getEthTokenBalanceOf(account common.Address, erc20contract common.Address) (*sdk.Int, error) {
@@ -796,13 +797,13 @@ func (s *IntegrationTestSuite) getERC20AllowanceOf(owner common.Address, spender
 	return &allowance, err
 }
 
-func (s *IntegrationTestSuite) SendEthTransaction(validator *validator, toAddress common.Address, data []byte) error {
+func (s *IntegrationTestSuite) SendEthTransaction(ethereumKey *ethereumKey, toAddress common.Address, data []byte) error {
 	ethClient, err := ethclient.Dial(fmt.Sprintf("http://%s", s.ethResource.GetHostPort("8545/tcp")))
 	if err != nil {
 		return err
 	}
 
-	privateKey, err := crypto.HexToECDSA(validator.ethereumKey.privateKey[2:])
+	privateKey, err := crypto.HexToECDSA(ethereumKey.privateKey[2:])
 	if err != nil {
 		return err
 	}
