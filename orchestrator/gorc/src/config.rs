@@ -158,6 +158,7 @@ pub struct GorcConfig {
     pub ethereum: EthereumSection,
     pub cosmos: CosmosSection,
     pub metrics: MetricsSection,
+    pub relayer: RelayerSection,
 }
 
 impl GorcConfig {
@@ -205,6 +206,7 @@ impl Default for GorcConfig {
             ethereum: EthereumSection::default(),
             cosmos: CosmosSection::default(),
             metrics: MetricsSection::default(),
+            relayer: RelayerSection::default(),
         }
     }
 }
@@ -213,7 +215,6 @@ impl Default for GorcConfig {
 #[serde(default, deny_unknown_fields)]
 pub struct GravitySection {
     pub contract: String,
-    pub payment_address: String,
     pub fees_denom: String,
 }
 
@@ -221,7 +222,6 @@ impl Default for GravitySection {
     fn default() -> Self {
         Self {
             contract: "0x0000000000000000000000000000000000000000".to_owned(),
-            payment_address: "0x0000000000000000000000000000000000000000".to_owned(),
             fees_denom: "stake".to_owned(),
         }
     }
@@ -309,6 +309,24 @@ impl Default for MetricsSection {
     fn default() -> Self {
         Self {
             listen_addr: "127.0.0.1:3000".parse().unwrap(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct RelayerSection {
+    pub mode: String,
+    pub payment_address: String,
+    pub ethereum_contracts: Vec<String>,
+}
+
+impl Default for RelayerSection {
+    fn default() -> Self {
+        Self {
+            mode: "AlwaysRelay".to_owned(),
+            payment_address: "0x0000000000000000000000000000000000000000".to_owned(),
+            ethereum_contracts: vec![]
         }
     }
 }
