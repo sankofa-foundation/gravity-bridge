@@ -42,7 +42,7 @@ pub async fn check_for_events<S: Signer + 'static, CS: CosmosSigner>(
     let prefix = contact.get_prefix();
     let our_cosmos_address = cosmos_key.to_address(&prefix).unwrap();
     let latest_block = get_block_number_with_retry(eth_client.clone()).await;
-    let latest_block = latest_block - block_delay;
+    let latest_block = latest_block.saturating_sub(block_delay);
 
     let mut ending_block = starting_block + blocks_to_search;
     if ending_block > latest_block {
@@ -71,6 +71,8 @@ pub async fn check_for_events<S: Signer + 'static, CS: CosmosSigner>(
         .event(&ValsetUpdatedEventFilter::abi_signature());
 
     let search_range = starting_block..ending_block;
+
+    info!("check_for_events from {:?} to {:?}", starting_block, ending_block);
 
     // select uses an inclusive version of the range
     erc20_deployed_filter = erc20_deployed_filter.select(search_range.clone());
