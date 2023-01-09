@@ -358,19 +358,11 @@ func NewGravityApp(
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 	)
 
-	app.stakingKeeper = *stakingKeeper.SetHooks(
-		stakingtypes.NewMultiStakingHooks(
-			app.distrKeeper.Hooks(),
-			app.slashingKeeper.Hooks(),
-			app.gravityKeeper.Hooks(),
-		),
-	)
-
 	app.ibcKeeper = ibckeeper.NewKeeper(
 		appCodec,
 		keys[ibchost.StoreKey],
 		app.GetSubspace(ibchost.ModuleName),
-		app.stakingKeeper,
+		&stakingKeeper,
 		app.upgradeKeeper,
 		scopedIBCKeeper,
 	)
@@ -400,13 +392,23 @@ func NewGravityApp(
 		keys[gravitytypes.StoreKey],
 		app.GetSubspace(gravitytypes.ModuleName),
 		app.accountKeeper,
-		stakingKeeper,
+		&stakingKeeper,
 		app.bankKeeper,
 		app.slashingKeeper,
 		app.distrKeeper,
 		sdk.DefaultPowerReduction,
 		app.ModuleAccountAddressesToNames([]string{}),
 		app.ModuleAccountAddressesToNames([]string{distrtypes.ModuleName}),
+	)
+
+	// we should set hooks after the gravity keeper is properly initialized so that the gravity keeper
+	// hooks could include the correct gravity keeper.
+	app.stakingKeeper = *stakingKeeper.SetHooks(
+		stakingtypes.NewMultiStakingHooks(
+			app.distrKeeper.Hooks(),
+			app.slashingKeeper.Hooks(),
+			app.gravityKeeper.Hooks(),
+		),
 	)
 
 	govRouter := govv1beta1.NewRouter()
@@ -499,7 +501,9 @@ func NewGravityApp(
 		params.NewAppModule(app.paramsKeeper),
 		transferModule,
 		gravity.NewAppModule(
+			appCodec,
 			app.gravityKeeper,
+			app.accountKeeper,
 			app.bankKeeper,
 		),
 	)
