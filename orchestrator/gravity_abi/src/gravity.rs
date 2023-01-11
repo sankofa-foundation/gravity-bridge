@@ -1,6 +1,7 @@
 pub use gravity::*;
 #[allow(clippy::too_many_arguments, non_camel_case_types)]
-pub mod gravity {
+#[allow(clippy::module_inception)]
+mod gravity {
     #![allow(clippy::enum_variant_names)]
     #![allow(dead_code)]
     #![allow(clippy::type_complexity)]

@@ -25,6 +25,7 @@ pub const TIMEOUT: Duration = Duration::from_secs(60);
 
 /// Send a transaction updating the eth address for the sending
 /// Cosmos address. The sending Cosmos address should be a validator
+#[allow(clippy::too_many_arguments)]
 pub async fn update_gravity_delegate_addresses<S: Signer + 'static, CS: CosmosSigner>(
     contact: &Contact,
     delegate_eth_address: EthAddress,
@@ -86,6 +87,7 @@ pub async fn update_gravity_delegate_addresses<S: Signer + 'static, CS: CosmosSi
 
 /// Sends tokens from Cosmos to Ethereum. These tokens will not be sent immediately instead
 /// they will require some time to be included in a batch
+#[allow(clippy::too_many_arguments)]
 pub async fn send_to_eth<CS: CosmosSigner>(
     cosmos_key: CS,
     cosmos_granter: Option<String>,
@@ -186,11 +188,15 @@ pub async fn send_messages<CS: CosmosSigner>(
 
     // multiply the estimated gas by the configured gas adjustment
     let estimated_gas_limit: f64 = (gas.gas_used as f64) * gas_adjustment;
-    args.fee.gas_limit = cmp::max(estimated_gas_limit as u64, gas_limit * messages.len() as u64);
+    args.fee.gas_limit = cmp::max(
+        estimated_gas_limit as u64,
+        gas_limit * messages.len() as u64,
+    );
 
     // compute the fee as fee=ceil(gas_limit * gas_price)
-    let fee_amount = (args.fee.gas_limit as u128).checked_mul(gas_price.0 as u128)
-        .ok_or_else( || GravityError::OverflowError("fee amount".to_string()))?;
+    let fee_amount = (args.fee.gas_limit as u128)
+        .checked_mul(gas_price.0 as u128)
+        .ok_or_else(|| GravityError::OverflowError("fee amount".to_string()))?;
     let fee_amount = Coin {
         denom: gas_price.1,
         amount: fee_amount.into(),
@@ -208,6 +214,7 @@ pub async fn send_messages<CS: CosmosSigner>(
     Ok(contact.wait_for_tx(response, TIMEOUT).await?)
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn send_main_loop<CS: CosmosSigner>(
     contact: &Contact,
     cosmos_key: CS,

@@ -1,4 +1,5 @@
 use crate::types::EthClient;
+use deep_space::error::CosmosGrpcError;
 use ethers::middleware::gas_oracle::Etherscan;
 use ethers::prelude::gas_oracle::GasOracle;
 use ethers::prelude::*;
@@ -8,9 +9,8 @@ use gravity_proto::gravity::query_client::QueryClient as GravityQueryClient;
 use gravity_utils::error::GravityError;
 use gravity_utils::ethereum::{downcast_to_u64, hex_str_to_bytes, vec_u8_to_fixed_32};
 use gravity_utils::types::{decode_gravity_error, GravityContractError};
-use tonic::transport::Channel;
 use std::result::Result;
-use deep_space::error::CosmosGrpcError;
+use tonic::transport::Channel;
 
 /// Gets the latest validator set nonce
 pub async fn get_valset_nonce<S: Signer + 'static>(
@@ -120,7 +120,7 @@ pub async fn get_event_nonce<S: Signer + 'static>(
 pub async fn get_gravity_id<S: Signer + 'static>(
     gravity_contract_address: EthAddress,
     eth_client: EthClient<S>,
-    mut cosmos_client: GravityQueryClient<Channel>
+    mut cosmos_client: GravityQueryClient<Channel>,
 ) -> Result<String, GravityError> {
     let contract_call = Gravity::new(gravity_contract_address, eth_client.clone())
         .state_gravity_id()
@@ -149,28 +149,25 @@ pub async fn get_gravity_id<S: Signer + 'static>(
                     if gravity_id != contract_id_value {
                         error!("Contract gravity id does not match with the chain gravity id");
                         return Err(GravityError::GravityContractError(format!(
-                            "Gravity contract id {} does not match with chain gravity id {}",
-                            gravity_id,
-                            contract_id_value,
-                        )))
+                            "Gravity contract id {gravity_id} does not match with chain gravity id {contract_id_value}"
+                        )));
                     }
 
-                    info!("Gravity contract id {} match with chain gravity id {}", gravity_id, contract_id_value);
+                    info!(
+                        "Gravity contract id {gravity_id} match with chain gravity id {contract_id_value}"
+                    );
                     Ok(params.gravity_id)
                 }
                 None => Err(GravityError::CosmosGrpcError(CosmosGrpcError::BadResponse(
-                    format!("Cannot get params from the chain"))))
+                    "Cannot get params from the chain".to_string(),
+                ))),
             }
-
-        },
+        }
         Err(err) => Err(GravityError::GravityContractError(format!(
             "Received invalid utf8 when getting gravity id {:?}: {}",
             &gravity_id, err
         ))),
     }
-
-
-
 }
 
 /// If ETHERSCAN_API_KEY env var is set, we'll call out to Etherscan for a gas estimate.
@@ -196,8 +193,7 @@ pub async fn get_chain<S: Signer + 'static>(
 
     if chain_id.is_none() {
         return Err(GravityError::EthereumBadDataError(format!(
-            "Chain ID is larger than u64 max: {}",
-            chain_id_result
+            "Chain ID is larger than u64 max: {chain_id_result}"
         )));
     }
 
@@ -231,11 +227,10 @@ impl GasCost {
 // returns a bool indicating whether or not this error means we should permanently
 // skip this logic call
 pub fn handle_contract_error<S: Signer + 'static>(gravity_error: GravityError) -> bool {
-    let error_string = format!("LogicCall error: {:?}", gravity_error);
-    let gravity_contract_error = extract_gravity_contract_error::<S>(gravity_error);
+    let error_string = format!("LogicCall error: {gravity_error:?}");
 
-    if gravity_contract_error.is_some() {
-        match gravity_contract_error.unwrap() {
+    if let Some(gravity_contract_error) = extract_gravity_contract_error::<S>(gravity_error) {
+        match gravity_contract_error {
             GravityContractError::InvalidLogicCallNonce(nonce_error) => {
                 info!(
                     "LogicCall already processed, skipping until observed on chain: {}",
@@ -252,11 +247,11 @@ pub fn handle_contract_error<S: Signer + 'static>(gravity_error: GravityError) -
             }
             // TODO(bolten): implement other cases if necessary
             _ => {
-                error!("Unspecified gravity contract error: {}", error_string)
+                error!("Unspecified gravity contract error: {error_string}")
             }
         }
     } else {
-        error!("Non-gravity contract error: {}", error_string);
+        error!("Non-gravity contract error: {error_string}");
     }
 
     false

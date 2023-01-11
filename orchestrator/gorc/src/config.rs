@@ -150,7 +150,7 @@ impl Keystore {
     }
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct GorcConfig {
     pub keystore: Keystore,
@@ -194,19 +194,6 @@ impl GorcConfig {
             let pk: cosmos_gravity::crypto::PrivateKey =
                 key.parse().expect("Could not parse private key");
             WrapperSigner::LocalCosmos(pk)
-        }
-    }
-}
-
-impl Default for GorcConfig {
-    fn default() -> Self {
-        Self {
-            keystore: Keystore::default(),
-            gravity: GravitySection::default(),
-            ethereum: EthereumSection::default(),
-            cosmos: CosmosSection::default(),
-            metrics: MetricsSection::default(),
-            relayer: RelayerSection::default(),
         }
     }
 }
@@ -326,7 +313,7 @@ impl Default for RelayerSection {
         Self {
             mode: "AlwaysRelay".to_owned(),
             payment_address: "0x0000000000000000000000000000000000000000".to_owned(),
-            ethereum_contracts: vec![]
+            ethereum_contracts: vec![],
         }
     }
 }
