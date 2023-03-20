@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"cosmossdk.io/simapp"
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/tx"
@@ -15,7 +16,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/keys/ed25519"
 	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
-	"github.com/cosmos/cosmos-sdk/simapp"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	sdkTx "github.com/cosmos/cosmos-sdk/x/auth/tx"
@@ -213,6 +213,7 @@ func (c *chain) clientContext(nodeURI string, kb *keyring.Keyring, fromName stri
 	}
 	simapp.ModuleBasics.RegisterLegacyAminoCodec(encodingConfig.Amino)
 	simapp.ModuleBasics.RegisterInterfaces(encodingConfig.InterfaceRegistry)
+	gravitytypes.RegisterInterfaces(encodingConfig.InterfaceRegistry)
 
 	rpcClient, err := rpchttp.New(nodeURI, "/websocket")
 	if err != nil {
@@ -228,7 +229,7 @@ func (c *chain) clientContext(nodeURI string, kb *keyring.Keyring, fromName stri
 		WithInput(os.Stdin).
 		WithNodeURI(nodeURI).
 		WithClient(rpcClient).
-		WithBroadcastMode(flags.BroadcastBlock).
+		WithBroadcastMode(flags.BroadcastSync).
 		WithKeyring(*kb).
 		WithAccountRetriever(authtypes.AccountRetriever{}).
 		WithOutputFormat("json").

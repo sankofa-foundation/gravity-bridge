@@ -178,12 +178,8 @@ message BatchTxRequest {
 message BatchTxResponse { BatchTx batch = 1; }
 
 //  rpc LastBatchTx
-message LastBatchTxRequest {
-  string token_contract = 1;
-}
-message LastBatchTxResponse {
-  BatchTx batch = 1;
-}
+message LastBatchTxRequest { string token_contract = 1; }
+message LastBatchTxResponse { BatchTx batch = 1; }
 
 //  rpc ContractCallTx
 message ContractCallTxRequest {

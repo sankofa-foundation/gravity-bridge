@@ -3,7 +3,7 @@ VERSION := $(shell git describe --abbrev=6 --dirty --always --tags)
 COMMIT := $(shell git log -1 --format='%H')
 DOCKER := $(shell which docker)
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
-HTTPS_GIT := https://github.com/peggyjv/gravity-bridge.git
+HTTPS_GIT := https://github.com/crypto-org-chain/gravity-bridge.git
 COVERAGE ?= coverage.txt
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 
@@ -80,32 +80,36 @@ lint:
 ###############################################################################
 ###                           Protobuf                                    ###
 ###############################################################################
+# ------
+# NOTE: Link to the tendermintdev/sdk-proto-gen docker images:
+#       https://hub.docker.com/r/tendermintdev/sdk-proto-gen/tags
+#
+protoVer=0.11.5
+protoImageName=ghcr.io/cosmos/proto-builder:$(protoVer)
+protoImage=$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace $(protoImageName)
 
 proto-all: proto-format proto-lint proto-gen
 
-proto-format:
-	@echo "Formatting Protobuf files"
-	$(DOCKER) run --rm -v $(CURDIR):/workspace \
-	--workdir /workspace tendermintdev/docker-build-proto \
-	find ./ -not -path "./third_party/*" -name *.proto -exec clang-format -i {} \;
-
 proto-gen:
 	@echo "Generating Protobuf files"
-	$(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace tendermintdev/sdk-proto-gen:v0.7 sh ./contrib/local/protocgen.sh
+	@$(protoImage) sh ./contrib/local/protocgen.sh
+
+proto-format:
+	@$(protoImage) find ./ -name "*.proto" -exec clang-format -i {} \;
 
 proto-lint:
-	@$(DOCKER_BUF) lint --error-format=json
+	@$(protoImage) buf lint --error-format=json
 
 proto-check-breaking:
-	@echo $(DOCKER_BUF) breaking --against "$(HTTPS_GIT)#branch=main"
-	@$(DOCKER_BUF) breaking --against "$(HTTPS_GIT)#branch=main"
+	@$(protoImage) buf breaking --against $(HTTPS_GIT)#branch=v2.0.0-cronos
 
-TM_URL           = https://raw.githubusercontent.com/tendermint/tendermint/v0.34.0-rc3/proto/tendermint
+TM_URL           = https://raw.githubusercontent.com/tendermint/tendermint/v0.37.0-rc2/proto/tendermint
 GOGO_PROTO_URL   = https://raw.githubusercontent.com/regen-network/protobuf/cosmos
-COSMOS_PROTO_URL = https://raw.githubusercontent.com/regen-network/cosmos-proto/master
-COSMOS_SDK_PROTO_URL = https://raw.githubusercontent.com/cosmos/cosmos-sdk/master/proto/cosmos/base
+COSMOS_PROTO_URL = https://raw.githubusercontent.com/cosmos/cosmos-proto/v1.0.0-beta.1/proto/cosmos_proto
+COSMOS_SDK_PROTO_URL = https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.47.0-rc1/proto/cosmos/base
 GOOGLE_PROTO_URL   = https://raw.githubusercontent.com/googleapis/googleapis/master/google/api
-PROTOBUF_GOOGLE_URL = https://raw.githubusercontent.com/protocolbuffers/protobuf/master/src/google/protobuf
+PROTOBUF_GOOGLE_URL = https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.47.0-rc1/third_party/proto/google/protobuf
+AMINO_PROTO_URL = https://raw.githubusercontent.com/cosmos/cosmos-sdk/v0.47.0-rc1/proto/amino
 
 TM_CRYPTO_TYPES     = third_party/proto/tendermint/crypto
 TM_ABCI_TYPES       = third_party/proto/tendermint/abci
@@ -121,6 +125,8 @@ PROTOBUF_GOOGLE_TYPES = third_party/proto/google/protobuf
 SDK_ABCI_TYPES  	= third_party/proto/cosmos/base/abci/v1beta1
 SDK_QUERY_TYPES  	= third_party/proto/cosmos/base/query/v1beta1
 SDK_COIN_TYPES  	= third_party/proto/cosmos/base/v1beta1
+
+AMINO_TYPES 		= third_party/proto/amino
 
 proto-update-deps:
 	mkdir -p $(GOGO_PROTO_TYPES)
@@ -139,6 +145,7 @@ proto-update-deps:
 	curl -sSL $(TM_URL)/types/types.proto > $(TM_TYPES)/types.proto
 	curl -sSL $(TM_URL)/types/evidence.proto > $(TM_TYPES)/evidence.proto
 	curl -sSL $(TM_URL)/types/params.proto > $(TM_TYPES)/params.proto
+	curl -sSL $(TM_URL)/types/validator.proto > $(TM_TYPES)/validator.proto
 
 	mkdir -p $(TM_CRYPTO_TYPES)
 	curl -sSL $(TM_URL)/crypto/proof.proto > $(TM_CRYPTO_TYPES)/proof.proto
@@ -155,6 +162,9 @@ proto-update-deps:
 
 	mkdir -p $(SDK_COIN_TYPES)
 	curl -sSL $(COSMOS_SDK_PROTO_URL)/v1beta1/coin.proto > $(SDK_COIN_TYPES)/coin.proto
+
+	mkdir -p $(AMINO_TYPES)
+	curl -sSL $(AMINO_PROTO_URL)/amino.proto > $(AMINO_TYPES)/amino.proto
 
 	mkdir -p $(GOOGLE_PROTO_TYPES)
 	curl -sSL $(GOOGLE_PROTO_URL)/annotations.proto > $(GOOGLE_PROTO_TYPES)/annotations.proto
