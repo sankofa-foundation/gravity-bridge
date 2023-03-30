@@ -22,6 +22,9 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 
+	tmconfig "github.com/cometbft/cometbft/config"
+	tmjson "github.com/cometbft/cometbft/libs/json"
+	rpchttp "github.com/cometbft/cometbft/rpc/client/http"
 	"github.com/cosmos/cosmos-sdk/server"
 	srvconfig "github.com/cosmos/cosmos-sdk/server/config"
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -38,9 +41,6 @@ import (
 	gravitytypes "github.com/peggyjv/gravity-bridge/module/v2/x/gravity/types"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
-	tmconfig "github.com/tendermint/tendermint/config"
-	tmjson "github.com/tendermint/tendermint/libs/json"
-	rpchttp "github.com/tendermint/tendermint/rpc/client/http"
 )
 
 const (
@@ -296,7 +296,7 @@ func (s *IntegrationTestSuite) initGenesis() {
 	s.Require().NoError(cdc.UnmarshalJSON(appGenState[govtypes.ModuleName], &govGenState))
 
 	// set short voting period to allow gov proposals in tests
-	votingPeriod := time.Second * 20
+	votingPeriod := time.Second * 40
 	govGenState.Params.VotingPeriod = &votingPeriod
 	govGenState.Params.MinDeposit = sdk.Coins{{Denom: testDenom, Amount: sdk.OneInt()}}
 	bz, err = cdc.MarshalJSON(&govGenState)

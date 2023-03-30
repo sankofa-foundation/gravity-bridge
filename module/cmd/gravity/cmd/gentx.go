@@ -13,13 +13,13 @@ import (
 	"sort"
 	"strings"
 
+	cfg "github.com/cometbft/cometbft/config"
+	tmos "github.com/cometbft/cometbft/libs/os"
+	tmtypes "github.com/cometbft/cometbft/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	cfg "github.com/tendermint/tendermint/config"
-	tmos "github.com/tendermint/tendermint/libs/os"
-	tmtypes "github.com/tendermint/tendermint/types"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -153,7 +153,7 @@ $ %s gentx my-key-name 1000000stake 0x033030FEeBd93E3178487c35A9c8cA80874353C9 c
 				return errors.Wrap(err, "failed to validate validator account in genesis")
 			}
 
-			txFactory := tx.NewFactoryCLI(clientCtx, cmd.Flags())
+			txFactory, err := tx.NewFactoryCLI(clientCtx, cmd.Flags())
 			if err != nil {
 				return errors.Wrap(err, "error creating tx builder")
 			}
