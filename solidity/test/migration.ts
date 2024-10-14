@@ -38,7 +38,7 @@ describe("migration tests", function () {
     // Send some token to the contract
     // =====================================
     await testERC20.functions.approve(gravity.address, 1000);
-    await expect(gravity.functions.sendToCronos(
+    await expect(gravity.functions.sendToSankofa(
         testERC20.address,
         "0xffffffffffffffffffffffffffffffffffffffff",
         1000

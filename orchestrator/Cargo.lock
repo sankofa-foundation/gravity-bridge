@@ -1948,7 +1948,7 @@ dependencies = [
 [[package]]
 name = "deep_space"
 version = "2.4.7"
-source = "git+https://github.com/crypto-org-chain/deep_space/?branch=update/deps#979787732f5882969fde430f77b72fbd75ecf88f"
+source = "git+https://github.com/sankofa-foundation/deep_space/?branch=update/deps#979787732f5882969fde430f77b72fbd75ecf88f"
 dependencies = [
  "base64 0.13.1",
  "bech32 0.8.1",

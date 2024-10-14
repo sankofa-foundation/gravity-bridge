@@ -3,7 +3,7 @@ VERSION := $(shell git describe --abbrev=6 --dirty --always --tags)
 COMMIT := $(shell git log -1 --format='%H')
 DOCKER := $(shell which docker)
 DOCKER_BUF := $(DOCKER) run --rm -v $(CURDIR):/workspace --workdir /workspace bufbuild/buf
-HTTPS_GIT := https://github.com/crypto-org-chain/gravity-bridge.git
+HTTPS_GIT := https://github.com/sankofa-foundation/gravity-bridge.git
 COVERAGE ?= coverage.txt
 PROJECT_NAME = $(shell git remote get-url origin | xargs basename -s .git)
 
@@ -101,7 +101,7 @@ proto-lint:
 	@$(protoImage) buf lint --error-format=json
 
 proto-check-breaking:
-	@$(protoImage) buf breaking --against $(HTTPS_GIT)#branch=v2.0.0-cronos
+	@$(protoImage) buf breaking --against $(HTTPS_GIT)#branch=v2.0.0-sankofa
 
 TM_URL           = https://raw.githubusercontent.com/tendermint/tendermint/v0.37.0-rc2/proto/tendermint
 GOGO_PROTO_URL   = https://raw.githubusercontent.com/regen-network/protobuf/cosmos

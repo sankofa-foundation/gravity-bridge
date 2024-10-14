@@ -114,7 +114,7 @@ describe("Gravity happy path valset update + batch submit", function () {
 
     // Transfer out to Cosmos, locking coins
     await testERC20.functions.approve(gravity.address, 1000);
-    await gravity.functions.sendToCronos(
+    await gravity.functions.sendToSankofa(
       testERC20.address,
       "0xffffffffffffffffffffffffffffffffffffffff",
       1000

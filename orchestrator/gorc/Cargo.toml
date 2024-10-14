@@ -25,7 +25,7 @@ gravity_utils = { path = "../gravity_utils" }
 orchestrator = { path = "../orchestrator" }
 relayer = { path = "../relayer" }
 
-deep_space = { git = "https://github.com/crypto-org-chain/deep_space/", branch = "update/deps" }
+deep_space = { git = "https://github.com/sankofa-foundation/deep_space/", branch = "update/deps" }
 ethers = { version = "1", features = ["abigen"] }
 clarity = "0.4.12"
 actix-rt = "2.5"

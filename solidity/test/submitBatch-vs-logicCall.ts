@@ -38,7 +38,7 @@ async function prepareTxBatch(batchSize: number, signers: Signer[]) {
   };
 }
 
-async function sendToCronos(
+async function sendToSankofa(
   gravity: Gravity,
   testERC20: TestERC20A,
   numCoins: number
@@ -46,7 +46,7 @@ async function sendToCronos(
   // Transfer out to Cosmos, locking coins
   // =====================================
   await testERC20.functions.approve(gravity.address, numCoins);
-  await gravity.functions.sendToCronos(
+  await gravity.functions.sendToSankofa(
     testERC20.address,
     "0xffffffffffffffffffffffffffffffffffffffff",
     numCoins
@@ -112,18 +112,18 @@ async function runSubmitBatchTest(opts: { batchSize: number }) {
 
   // Lock tokens in gravity
   // ====================
-  await sendToCronos(gravity, testERC20, 1000);
+  await sendToSankofa(gravity, testERC20, 1000);
 
   expect(
     (await testERC20.functions.balanceOf(gravity.address))[0].toNumber(),
-    "gravity does not have correct balance after sendToCronos"
+    "gravity does not have correct balance after sendToSankofa"
   ).to.equal(1000);
 
   expect(
     (
       await testERC20.functions.balanceOf(await signers[0].getAddress())
     )[0].toNumber(),
-    "msg.sender does not have correct balance after sendToCronos"
+    "msg.sender does not have correct balance after sendToSankofa"
   ).to.equal(9000);
 
   // Prepare tx batch
@@ -240,18 +240,18 @@ async function runLogicCallTest(opts: {
 
   // Lock tokens in gravity
   // ====================
-  await sendToCronos(gravity, testERC20, 1000);
+  await sendToSankofa(gravity, testERC20, 1000);
 
   expect(
     (await testERC20.functions.balanceOf(gravity.address))[0].toNumber(),
-    "gravity does not have correct balance after sendToCronos"
+    "gravity does not have correct balance after sendToSankofa"
   ).to.equal(1000);
 
   expect(
     (
       await testERC20.functions.balanceOf(await signers[0].getAddress())
     )[0].toNumber(),
-    "msg.sender does not have correct balance after sendToCronos"
+    "msg.sender does not have correct balance after sendToSankofa"
   ).to.equal(9000);
 
   // Preparing tx batch

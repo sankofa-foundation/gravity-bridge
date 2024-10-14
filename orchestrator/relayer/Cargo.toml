@@ -19,7 +19,7 @@ gravity_abi = { path = "../gravity_abi" }
 gravity_utils = { path = "../gravity_utils" }
 gravity_proto = { path = "../gravity_proto" }
 
-deep_space = { git = "https://github.com/crypto-org-chain/deep_space/", branch = "update/deps" }
+deep_space = { git = "https://github.com/sankofa-foundation/deep_space/", branch = "update/deps" }
 ethers = { version = "1", features = ["abigen"] }
 serde_derive = "1.0"
 clarity = "0.4.11"

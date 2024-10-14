@@ -57,11 +57,11 @@ describe("EthGravityWrapper tests", function () {
     // Sending ETH over
     await testWETH.functions.approve(gravity.address, 100);
     await expect(
-      ethGravityWrapper.functions.sendToCronosEth(destination, {
+      ethGravityWrapper.functions.sendToSankofaEth(destination, {
         value: "100",
       })
     )
-      .to.emit(ethGravityWrapper, "sendToCronosEthEvent")
+      .to.emit(ethGravityWrapper, "sendToSankofaEthEvent")
       .withArgs(await signers[0].getAddress, destination, 100);
 
     // Check balance after on Gravity.sol
@@ -83,7 +83,7 @@ describe("EthGravityWrapper tests", function () {
 
     // Sending ETH over
     await testWETH.functions.approve(gravity.address, 10000000);
-    await ethGravityWrapper.functions.sendToCronosEth(destination, {
+    await ethGravityWrapper.functions.sendToSankofaEth(destination, {
       value: "10000000",
     });
 
@@ -105,7 +105,7 @@ describe("EthGravityWrapper tests", function () {
     // Sending ETH over with 0 value
     await testWETH.functions.approve(gravity.address, 100);
     await expect(
-      ethGravityWrapper.functions.sendToCronosEth(destination)
+      ethGravityWrapper.functions.sendToSankofaEth(destination)
     ).to.be.revertedWith("Amount should be greater than 0");
 
     // Check balance after on Gravity.sol

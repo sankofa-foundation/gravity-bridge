@@ -36,7 +36,7 @@ async function runTest(opts: {}) {
   // Transfer out to Cosmos, locking coins
   // =====================================
   await testERC20.functions.approve(gravity.address, 1000);
-  await expect(gravity.functions.sendToCronos(
+  await expect(gravity.functions.sendToSankofa(
     testERC20.address,
     "0xffffffffffffffffffffffffffffffffffffffff",
     1000
@@ -56,7 +56,7 @@ async function runTest(opts: {}) {
   // Do it again
   // =====================================
   await testERC20.functions.approve(gravity.address, 1000);
-  await expect(gravity.functions.sendToCronos(
+  await expect(gravity.functions.sendToSankofa(
     testERC20.address,
     "0xffffffffffffffffffffffffffffffffffffffff",
     1000
@@ -72,7 +72,7 @@ async function runTest(opts: {}) {
   expect((await gravity.functions.state_lastEventNonce())[0]).to.equal(3);
 }
 
-describe("sendToCronos tests", function () {
+describe("sendToSankofa tests", function () {
   it("works right", async function () {
     await runTest({})
   });
